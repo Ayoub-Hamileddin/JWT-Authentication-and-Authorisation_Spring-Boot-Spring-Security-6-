@@ -2,11 +2,17 @@ package com.eyuup.security.service;
 
 import com.eyuup.security.payload.request.LoginRequest;
 import com.eyuup.security.payload.request.RegisterRequest;
-import com.eyuup.security.payload.response.LoginResponse;
-import com.eyuup.security.payload.response.RegisterResponse;
+import com.eyuup.security.payload.response.AuthResponse;
+import com.eyuup.security.payload.response.TokenResponseDto;
+
+import jakarta.servlet.http.HttpServletResponse;
 
 public interface AuthService {
-    public RegisterResponse register(RegisterRequest request);
+     AuthResponse register(RegisterRequest request);
 
-    public LoginResponse Login(LoginRequest request);
+     AuthResponse Login(LoginRequest request,HttpServletResponse response);
+
+     TokenResponseDto refreshToken(String token);
+
+
 }
