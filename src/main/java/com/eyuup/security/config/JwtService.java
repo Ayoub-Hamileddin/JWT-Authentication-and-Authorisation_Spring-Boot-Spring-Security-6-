@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +23,12 @@ public class JwtService {
 
     private final static String SECRET_KEY="wUEIsKbbjn+3Wgu6TzDOk5MZ3BD4T0GMmYWfn5O1hrfon1al+xF9E2Yq6H6cMtXb";
 
+    @Value("${jwt.refresh-token-expiration}")
+    private Long refreshTokenExpiration;
+
+    @Value("${jwt.access-token-expiration}")
+    private Long accessTokenExpiration;
+
     public String extractUserName(String jwt){
         return extractClaim(jwt, Claims::getSubject);
     }
@@ -32,19 +39,24 @@ public class JwtService {
         return claimsReslover.apply(claims);
     }
 
+    public String generateAcessToken(Map<String,Object> extraClaims,UserDetails userDetails){
+           return  generateToken(extraClaims,userDetails,accessTokenExpiration);
+    }
+    public String generateRefreshToken(Map<String,Object> extraClaims,UserDetails userDetails){
+           return  generateToken(extraClaims,userDetails,refreshTokenExpiration);
+    }
 
-      public String generateToken(UserDetails userDetails)
-       {
-            return generateToken(new HashMap<>(), userDetails);
-       }
 
-    public String generateToken(Map<String,Object> extraClaims,UserDetails userDetails){
+
+
+
+    public String generateToken(Map<String,Object> extraClaims,UserDetails userDetails,Long expireDate){
         return Jwts
         .builder()
         .setClaims(extraClaims != null ? extraClaims : new HashMap<>())
         .setSubject(userDetails.getUsername())
         .setIssuedAt(new Date(System.currentTimeMillis()))
-        .setExpiration(new Date(System.currentTimeMillis() + 1000*60*60*24) )
+        .setExpiration(new Date(System.currentTimeMillis() + expireDate) )
         .signWith(getSignkey(),SignatureAlgorithm.HS256)
         .compact(); 
         
